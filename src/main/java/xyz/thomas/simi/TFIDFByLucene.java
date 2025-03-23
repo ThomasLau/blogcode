@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.stream.Collectors;
 
 import org.ansj.library.DicLibrary;
@@ -53,7 +54,7 @@ public class TFIDFByLucene {
      */
     public static Map<String, Map<CharSequence, Integer>> createTfIdf(Map<String, String> texts) throws Exception {
         Directory directory = indexToMemory(texts);
-        Map<String, Map<CharSequence, Integer>> tfIdfMap = new HashMap<>();
+        Map<String, Map<CharSequence, Integer>> tfIdfMap = new TreeMap<>();
         try (IndexReader ireader = DirectoryReader.open(directory);) {
             for (int i = 0; i < ireader.maxDoc(); i++) {
                 Document doc = ireader.document(i);
@@ -73,7 +74,7 @@ public class TFIDFByLucene {
     private static Map<CharSequence, Integer> calcTFIDF(IndexReader ireader, String sentence) throws Exception {
         Map<CharSequence, Integer> tfIdf = new HashMap<>();
         Map<WordInfo, Integer> tf = termFrequency(sentence, EXCLUDE_TYPE, WeightsMap);
-        // System.out.println(tf);
+        System.out.println(tf);
         for (WordInfo term : tf.keySet()) {
             int docFreq = ireader.docFreq(new Term("text", term.getText()));
             int termFreq = tf.get(term);
@@ -122,12 +123,12 @@ public class TFIDFByLucene {
     }
 
     public static Set<String> nzrSet = ImmutableSet.of("ns", "nz", "nr", "nw");
-    public static Set<String> EXCLUDE_TYPE = ImmutableSet.of("y", "u", "d");//"w", "u"
+    public static Set<String> EXCLUDE_TYPE = ImmutableSet.of("y", "u", "d", "w");// "u"
     //public static Set<String> EXCLUDE_TYPE = ImmutableSet.of("w", "u");
     //public static Map<String, Integer> WeightsMap = ImmutableMap.of();
-    public static Map<String, Integer> WeightsMap = ImmutableMap.of("ns", 2, "nz", 2, "nr", 2, "nw", 2);
+    // public static Map<String, Integer> WeightsMap = ImmutableMap.of();//"ns", 2, "nz", 2, "nr", 2, "nw", 2);
     //public static Map<String, Integer> WeightsMap = ImmutableMap.of("ns", 20, "nz", 20, "nr", 20, "nw", 20);
-
+    public static Map<String, Integer> WeightsMap = ImmutableMap.of("ns", 2, "nz", 2, "nr", 2, "nw", 2);
     public static List<WordInfo> splitWords(String sentence) {
         List<WordInfo> output = new LinkedList<>();
         try (TokenStream ts = analyzer.tokenStream("myfield", new StringReader(sentence))) {
@@ -154,9 +155,9 @@ public class TFIDFByLucene {
             ansjargs.put(StopLibrary.DEFAULT, "stop");// "library/stop.dic");
             ansjargs.put(DicLibrary.DEFAULT, "dic");// "library/default.dic");
             ansjargs.put(SynonymsLibrary.DEFAULT, "synonyms");// "library/synonyms.dic");
-            ansjargs.put("isNameRecognition", "true");
-            ansjargs.put("isNumRecognition", "true");
-            ansjargs.put("isQuantifierRecognition", "true");
+//            ansjargs.put("isNameRecognition", "true");
+//            ansjargs.put("isNumRecognition", "true");
+//            ansjargs.put("isQuantifierRecognition", "true");
 //            ansjargs.put("isRealName", "false");
             if ("query".equals(btype)) {
                 ansjargs.put("type", AnsjAnalyzer.TYPE.query_ansj.name());

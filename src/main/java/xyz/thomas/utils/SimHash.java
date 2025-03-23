@@ -1,6 +1,7 @@
-package xyz.thomas.simi;
+package xyz.thomas.utils;
 
 import java.math.BigInteger;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -9,10 +10,12 @@ import java.util.function.BiFunction;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import xyz.thomas.simi.WordInfo;
+
 public class SimHash {
     private static Logger log = LoggerFactory.getLogger(SimHash.class);
     private static final int DEFAULT_BITS = 64; // 分词后的hash数;
-    private BigInteger strSimHash;// 字符产的hash值
+    protected BigInteger strSimHash;// 字符产的hash值
     private int hashbits = 64; // 分词后的hash数;
 
     public static SimHash of(List<WordInfo> tokens) {
@@ -38,7 +41,7 @@ public class SimHash {
     private static BigInteger simHash(List<WordInfo> tokens, int hashbits, BiFunction<WordInfo, Integer, Integer> weightFunc) {
         int[] v = new int[hashbits];
         int overCount = 5; // 设定超频词汇的界限 ;
-        Map<String, Integer> wordCount = new HashMap<String, Integer>();
+        Map<String, Integer> wordCount = new HashMap<String, Integer>(tokens.size());
         for (int idx = 0; idx < tokens.size(); idx++) {
             WordInfo wordInfo = tokens.get(idx);
             String word = wordInfo.getText();
@@ -68,7 +71,10 @@ public class SimHash {
                 } else {
                     v[i] -= weight;
                 }
+                // System.out.println(v[i]);
+                // log.debug("hash[vi]: "+ Arrays.toString(v));
             }
+            log.debug("hash[vi]: {},{}", tokens.get(0), Arrays.toString(v));
         }
         BigInteger fingerprint = new BigInteger("0");
         for (int i = 0; i < hashbits; i++) {
@@ -76,7 +82,7 @@ public class SimHash {
                 fingerprint = fingerprint.add(new BigInteger("1").shiftLeft(i));
             }
         }
-        // log.debug("hanlp:" + fingerprint + "-" + wordCount);
+        // log.info("hanlp:" + fingerprint + "-" + wordCount+"--"+Arrays.toString(v));
         return fingerprint;
     }
 
@@ -97,6 +103,7 @@ public class SimHash {
                 x = x.multiply(m).xor(temp).and(mask);
             }
             x = x.xor(new BigInteger(String.valueOf(source.length())));
+            // System.out.println(x);
             if (x.equals(new BigInteger("-1"))) {
                 x = new BigInteger("-2");
             }

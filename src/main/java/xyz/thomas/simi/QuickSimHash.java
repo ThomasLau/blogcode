@@ -1,9 +1,15 @@
 package xyz.thomas.simi;
 
+import java.math.BigInteger;
 import java.nio.CharBuffer;
+import java.util.AbstractMap;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+import java.util.function.BiFunction;
+import java.util.stream.Collectors;
+
 import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
 import st.ata.util.FPGenerator;
 
@@ -143,6 +149,42 @@ public class QuickSimHash {
             }
         }
 
+        return simhash;
+    }
+    static int printed = 80;
+    public static long computeSimHash(List<WordInfo> tokens, BiFunction<WordInfo, Integer, Integer> weightFunc) {
+        int v[] = new int[HASH_SIZE];
+        int idx = 0;
+        for (WordInfo wd : tokens) {
+            int weight = weightFunc.apply(wd, idx);
+            byte[] bytes = wd.getText() .getBytes();
+            long longHash = FPGenerator.std64.fp(bytes, 0, bytes.length);
+            for (int i = 0; i < HASH_SIZE; ++i) {
+                boolean bitSet = ((longHash >> i) & 1L) == 1L;
+                v[i] += (bitSet) ? weight : -weight;
+            }
+        }
+        long simhash = 0;
+        for (int i = 0; i < HASH_SIZE; ++i) {
+            if (v[i] > 0) {
+                simhash |= (1L << i);
+            }
+        }
+        // 
+//        System.out.println(tokens.stream().map(wd -> new AbstractMap.SimpleEntry<String,Integer>(wd.getText(), 
+//                weightFunc.apply(wd, 1))).collect(Collectors.toMap(
+//                        Map.Entry::getKey,
+//                        Map.Entry::getValue
+//                    )));
+        if (0!=printed) {
+            System.out.println(tokens.stream().map(wd -> new AbstractMap.SimpleEntry<String,Integer>(wd.getText(), 
+                    weightFunc.apply(wd, 1))).collect(Collectors.groupingBy(
+                            Map.Entry::getKey,
+                            // Collectors.mapping(Map.Entry::getValue, Collectors.toSet())
+                            Collectors.summingInt(term -> 1)
+                            )));
+            printed--;
+        }
         return simhash;
     }
 
