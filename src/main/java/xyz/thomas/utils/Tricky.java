@@ -32,10 +32,10 @@ public class Tricky {
                 + "([0-9a-z_!~*'()-]+\\.)*" // 域名- www.
                 + "([0-9a-z][0-9a-z-]{0,61})?[0-9a-z]\\." // 二级域名
                 + "[a-z]{2,6})" // first level domain- .com or .museum
-                + "(:[0-9]{1,5})?" // 端口号最大为65535,5位数
+                + "(:[0-9]{1,5})?" 
                 + "((/?)|" // a slash isn't required if there is no file name
                 + "(/[0-9a-z_!~*'{}().;?:@&=+$,%#-\\[\\]]+)+/?)$";
-        boolean match = "https://actxxsy.yuewen.com/noah/726843558/../../../../../../../../../../../../../../../../../../../../etc/./////.////.///.//./passwd\\u0000"
+        boolean match = "https://act.foo.bar/nomandi/726843558/../../../../../../../../../../../../../../../../../../../../etc/./////.////.///.//./passwd\\u0000"
                 .matches(regex);
         System.out.println(match);
     }
